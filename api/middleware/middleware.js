@@ -2,7 +2,13 @@ const User = require('../users/users-model');
 
 function logger(req, res, next) {
   // DO YOUR MAGIC
-  console.log(`[${new Date().toISOString()}] [${req.method}] ${req.path}`)
+  // const date = new Date();
+  // console.log(`
+  //   REQUEST METHOD: ${req.method}
+  //   REQUEST URL: ${req.originalUrl}
+  //   TIMESTAMP: ${date.toLocaleString()}
+  // `);
+  console.log(`[${new Date().toLocaleString()}] [${req.method}] ${req.path}`)
   next()
 }
 
@@ -21,6 +27,24 @@ function validateUserId(req, res, next) {
     })
     .catch(next)
 }
+//another way
+// async function validateUserId(req, res, next) {
+//   try{
+//     const user = await User.getById(req.params.id)
+//     if(!user) {
+//       res.status(404).json({
+//         message: 'no such user'
+//       })
+//     } else {
+//       req.user = user
+//       next()
+//     }
+//   } catch (err) {
+//     res.status(500).json({
+//       message: 'problem finding user'
+//     })
+//   }
+// }
 
 function validateUser(req, res, next) {
   // DO YOUR MAGIC
@@ -35,13 +59,28 @@ function validateUser(req, res, next) {
       status: 400
     })
   } else {
-    req.user = { name: name.trim() }
+    req.name = name.trim()
     next()
   }
 }
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
+  //!req.body || Object.keys(req.body).length === 0
+  const { text } = req.body
+  if (
+    !text ||
+    typeof text !== 'string' ||
+    text.trim().length <= 2
+  ) {
+    next({
+      message: "missing required text field",
+      status: 400
+    })
+  } else {
+    req.text = text.trim()
+    next()
+  }
 }
 
 function errorHandler(err, req, res, next) { // eslint-disable-line
